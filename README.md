@@ -1,2 +1,3 @@
 # dprint-plugin-mesonbuild
-meson.build code formatting plugin for dprint. 
+
+meson.build code formatting plugin for dprint.
