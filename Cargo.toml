@@ -3,18 +3,34 @@ name = "dprint-plugin-mesonbuild"
 version = "0.1.0"
 authors = ["Tice Cosmos <tice@139.com>"]
 edition = "2018"
+license = "MIT"
+description = "Meson build code formatter."
+keywords = ["formatter", "meson"]
+homepage = "https://github.com/dprint/dprint-plugin-typescript"
+repository = "https://github.com/dprint/dprint-plugin-typescript"
 
 
 [lib]
 crate-type = ["lib", "cdylib"]
 
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
+debug-assertions = false
+overflow-checks = false
+panic = "abort"
+
+
+[features]
+wasm = ["dprint-core/wasm"]
+
 
 [dependencies]
-dprint-core = { version = "0.42", features = ["formatting", "wasm"] }
-
-serde = { version = "*", features = ["derive"] }
+dprint-core = { version = "0.42", features = ["formatting"] }
 serde_json = "1.0"
 
+serde = { version = "*", features = ["derive"] }
+
 [dev-dependencies]
-lazy_static = "1.4"
 toml = "0.5"

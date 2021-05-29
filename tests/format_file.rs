@@ -1,5 +1,5 @@
 use dprint_core::{
-    configuration::{ConfigKeyMap, GlobalConfiguration, ResolveConfigurationResult},
+    configuration::{ConfigKeyMap, ResolveConfigurationResult},
     plugins::{PluginHandler, PluginInfo},
     types::ErrBox,
 };

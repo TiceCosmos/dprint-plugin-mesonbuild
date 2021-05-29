@@ -15,14 +15,19 @@ impl PluginHandler<Configuration> for MesonPluginHandler {
             name: env!("CARGO_PKG_NAME").to_string(),
             version: env!("CARGO_PKG_VERSION").to_string(),
             config_key: "mesonbuild".to_string(),
-            file_extensions: vec!["meson.build".to_string()],
+            file_extensions: vec!["meson.build", "meson_options.txt"]
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect(),
             help_url: "".to_string(),
             config_schema_url: "".to_string(),
         }
     }
 
     fn get_license_text(&mut self) -> String {
-        std::str::from_utf8(include_bytes!("../LICENSE")).unwrap().into()
+        std::str::from_utf8(include_bytes!("../LICENSE"))
+            .unwrap()
+            .into()
     }
 
     fn resolve_config(
