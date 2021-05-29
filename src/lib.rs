@@ -1,10 +1,8 @@
-pub mod configuration;
+mod configuration;
 mod format_text;
+mod grammar;
+mod parser;
+mod plugin;
 
-#[cfg(feature = "wasm")]
-#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
-mod wasm_plugin;
-
-#[cfg(feature = "wasm")]
-#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
-pub use wasm_plugin::*;
+pub use configuration::Configuration;
+pub use plugin::*;

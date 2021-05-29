@@ -1,5 +1,4 @@
 {
   "editor.defaultFormatter": "dprint.dprint",
-  "rust-analyzer.cargo.allFeatures": true,
   "rust-analyzer.cargo.target": "wasm32-unknown-unknown"
 }

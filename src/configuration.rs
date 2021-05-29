@@ -1,51 +1,78 @@
+use dprint_core::configuration::get_unknown_property_diagnostics;
 use dprint_core::configuration::{
-    get_unknown_property_diagnostics, get_value, ConfigKeyMap, GlobalConfiguration,
-    ResolveConfigurationResult,
+    ConfigKeyMap, ConfigurationDiagnostic, GlobalConfiguration, ResolveConfigurationResult,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use std::{fmt, str::FromStr};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Configuration {
-    pub line_width: u32,
-    pub indent_string: String,
+    /// indent width
+    pub indent_width: u8,
+    /// spaces before ":"
+    pub space_before_colon: bool,
+    /// spaces before "(", "[", "{" and after "}", "]", ")"
+    pub space_inner_bracket: bool,
+}
+impl Default for Configuration {
+    fn default() -> Self {
+        Self {
+            indent_width: 2,
+            space_before_colon: false,
+            space_inner_bracket: false,
+        }
+    }
 }
 
 pub fn resolve_config(
     config: ConfigKeyMap,
     global_config: &GlobalConfiguration,
 ) -> ResolveConfigurationResult<Configuration> {
-    let mut config = config;
-    let mut diagnostics = Vec::new();
+    let mut builder = ConfigurationBuilder::new(config);
 
-    let line_width = get_value(
-        &mut config,
-        "line_width",
-        global_config.line_width.unwrap_or(120),
-        &mut diagnostics,
-    );
+    let mut config = Configuration::default();
+    if let Some(value) = global_config.indent_width {
+        config.indent_width = value;
+    }
 
-    let indent_string = get_value(
-        &mut config,
-        "indent_string",
-        if global_config.use_tabs.unwrap_or(false) {
-            "\t".to_string()
-        } else {
-            format!(
-                "{:1$}",
-                "",
-                global_config.indent_width.unwrap_or(4) as usize
-            )
-        },
-        &mut diagnostics,
-    );
-
-    diagnostics.extend(get_unknown_property_diagnostics(config));
+    builder.get_nullable_value(&mut config.indent_width, "indent_width");
+    builder.get_nullable_value(&mut config.space_before_colon, "space_before_colon");
+    builder.get_nullable_value(&mut config.space_inner_bracket, "space_before_colon");
 
     ResolveConfigurationResult {
-        config: Configuration {
-            line_width,
-            indent_string,
-        },
-        diagnostics,
+        config,
+        diagnostics: builder.extend(),
+    }
+}
+
+struct ConfigurationBuilder {
+    config: ConfigKeyMap,
+    diagnostics: Vec<ConfigurationDiagnostic>,
+}
+impl ConfigurationBuilder {
+    fn new(config: ConfigKeyMap) -> Self {
+        Self {
+            config,
+            diagnostics: Vec::new(),
+        }
+    }
+    fn extend(self) -> Vec<ConfigurationDiagnostic> {
+        let mut data = self;
+        data.diagnostics
+            .extend(get_unknown_property_diagnostics(data.config));
+        data.diagnostics
+    }
+    fn get_nullable_value<T>(&mut self, store: &mut T, key: &'static str)
+    where
+        T: FromStr,
+        <T as FromStr>::Err: fmt::Display,
+    {
+        if let Some(value) = dprint_core::configuration::get_nullable_value(
+            &mut self.config,
+            key,
+            &mut self.diagnostics,
+        ) {
+            *store = value;
+        }
     }
 }
