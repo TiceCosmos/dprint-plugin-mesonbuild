@@ -1,3 +1,5 @@
 indentWidth = 4
+alignColon = true
 spaceBeforeColon = true
 spaceInnerBracket = true
+wrapCloseBrace = true

@@ -1,8 +1,4 @@
-use dprint_core::{
-    configuration::{ConfigKeyMap, ResolveConfigurationResult},
-    plugins::{PluginHandler, PluginInfo},
-    types::ErrBox,
-};
+use dprint_core::{configuration::ConfigKeyMap, plugins::PluginHandler, types::ErrBox};
 use dprint_plugin_mesonbuild::*;
 use std::path::Path;
 
@@ -41,6 +37,24 @@ fn format1() {
         format_with_host,
     );
     let result = result.unwrap();
+
+    assert_eq!(result, FORMAT_CONTENT);
+}
+
+#[test]
+fn format2() {
+    const FORMAT_CONTENT: &str = include_str!("data/2/meson.build");
+    let config: Configuration = toml::from_str(include_str!("data/2/config.toml")).unwrap();
+
+    let result = MesonPluginHandler::default().format_text(
+        &Path::new(ORIGIN_FILE_PATH),
+        ORIGIN_CONTENT,
+        &config,
+        format_with_host,
+    );
+    let result = result.unwrap();
+
+    std::fs::write("/tmp/meson.build", &result).unwrap();
 
     assert_eq!(result, FORMAT_CONTENT);
 }

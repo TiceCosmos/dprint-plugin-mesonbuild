@@ -10,8 +10,10 @@ See [Release](https://github.com/TiceCosmos/dprint-plugin-mesonbuild/releases/la
 
 ## Configuration
 
-| Name              | Type | Default | description                                         |
-| :---------------- | :--- | ------: | :-------------------------------------------------- |
-| indentWidth       | u8   |       2 | indent width                                        |
-| spaceBeforeColon  | bool |   false | spaces before ":"                                   |
-| spaceInnerBracket | bool |   false | spaces before "(", "[", "{" and after "}", "]", ")" |
+| Name              | Type | Default | description                                 |
+| :---------------- | :--- | ------: | :------------------------------------------ |
+| indentWidth       | u8   |       2 | indent width                                |
+| alignColon        | bool |   false | align at `:`                                |
+| spaceBeforeColon  | bool |   false | spaces before `:`                           |
+| spaceInnerBracket | bool |   false | spaces before `(, [, {` and after `), ], }` |
+| wrapCloseBrace    | bool |    true | wrap before `), ], }`                       |

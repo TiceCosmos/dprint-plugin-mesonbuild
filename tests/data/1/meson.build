@@ -4,9 +4,9 @@ project( 'dprint-plugin-mesonbuild', 'rust', 'c', version : '0.1.0' )
 project(
     'dprint-plugin-mesonbuild',
     [ 'c', 'cpp' ],
-    version : '0.1.0',
-    meson_version : '>=0.56.0',
-    license : 'proprietary',
+    version         : '0.1.0',
+    meson_version   : '>=0.56.0',
+    license         : 'proprietary',
     default_options : [
         'warning_level=3',
         'default_library=static',
@@ -43,15 +43,15 @@ thread_dep = dependency( 'threads' )
 llvm_dep = dependency( 'llvm', version : '>= 4.0', modules : [ 'amdgpu' ] )
 llvm_dep = dependency(
     'llvm',
-    version : '>= 4.0',
-    modules : [ 'amdgpu' ],
+    version          : '>= 4.0',
+    modules          : [ 'amdgpu' ],
     optional_modules : [ 'inteljitevents' ],
 )
 zlib_dep = dependency(
     'zlib',
     include_type : 'system',
-    required : false,
-    disabler : true,
+    required     : false,
+    disabler     : true,
 )
 
 
@@ -71,10 +71,10 @@ if get_option( 'build_tests' )
                 'test_' + name,
                 info.get( 'src' ),
                 include_directories : info.get( 'inc' ),
-                link_with : info.get( 'lnk' ),
-                dependencies : [ doctest_dep, common_deps ],
+                link_with           : info.get( 'lnk' ),
+                dependencies        : [ doctest_dep, common_deps ],
             ),
-            args : [ '--no-version=true' ],
+            args    : [ '--no-version=true' ],
             workdir : meson.project_build_root(),
         )
     endforeach

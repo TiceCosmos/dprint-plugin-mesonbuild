@@ -11,16 +11,11 @@ pub fn format_text(file_text: &str, config: &Configuration) -> Result<String, Pa
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const CONFIG: Configuration = Configuration {
-        indent_width: 2,
-        space_before_colon: false,
-        space_inner_bracket: false,
-    };
+    use crate::configuration::DEFAULT_CONFIGURATION;
 
     #[test]
     fn format_auxiliary() {
-        assert_eq!(format_text("", &CONFIG).unwrap(), "");
+        assert_eq!(format_text("", &DEFAULT_CONFIGURATION).unwrap(), "");
 
         vec![
             ("#", "#"),
@@ -30,8 +25,8 @@ mod tests {
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -50,8 +45,8 @@ mod tests {
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -79,8 +74,8 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -114,8 +109,8 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -132,8 +127,8 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -169,8 +164,8 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -243,8 +238,8 @@ endif
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 
@@ -292,8 +287,8 @@ endforeach
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &CONFIG).unwrap(), dst);
-            assert_eq!(format_text(dst, &CONFIG).unwrap(), dst);
+            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
         });
     }
 }

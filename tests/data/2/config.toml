@@ -2,4 +2,4 @@ indentWidth = 2
 alignColon = false
 spaceBeforeColon = false
 spaceInnerBracket = false
-wrapCloseBrace = true
+wrapCloseBrace = false

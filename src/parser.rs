@@ -158,8 +158,8 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
         loop {
             match self.chars.next() {
-                None => return Ok(write!(stage, "{}", buff.trim_end())?),
-                Some('\n') => return Ok(writeln!(stage, "{}", buff.trim_end())?),
+                None => return Ok(write!(stage, "{}", buff.trim_end_matches(' '))?),
+                Some('\n') => return Ok(writeln!(stage, "{}", buff.trim_end_matches(' '))?),
                 Some(c) => buff.push(c),
             }
         }
@@ -236,8 +236,9 @@ impl<'a, 'b> Parser<'a, 'b> {
     }
 
     fn parse_list(&mut self, stage: &mut String, indent_outer: u8, char_begin: char, char_close: char) -> Result {
-        let mut items = vec![];
-
+        // BUG: cann't format the comment between key and value
+        let mut list = vec![];
+        let mut item = (String::new(), String::new());
         let mut buff = Buffer::new();
 
         let mut multiline = false;
@@ -252,68 +253,92 @@ impl<'a, 'b> Parser<'a, 'b> {
                 .ok_or_else(|| ParseError::NotFindSyntaxClose(char_begin.into()))?
             {
                 c if c == char_close => {
-                    buff.merge_span_to_line();
-                    if !buff.line.is_empty() {
-                        buff.line.push(',');
-                        items.push(buff.line);
+                    buff.move_line_to_stage(&mut item.1);
+                    if !item.0.is_empty() || !item.1.is_empty() {
+                        item.1.push(',');
+                        list.push(item);
                     }
-                    if items.is_empty() {
-                        return Ok(write!(stage, "{}{}", char_begin, char_close)?);
-                    }
-                    for item in items.iter_mut() {
-                        if item.ends_with('\n') {
-                            item.pop();
+                    let key_max_length = match list.iter().map(|(k, _)| k.len()).max() {
+                        None => return Ok(write!(stage, "{}{}", char_begin, char_close)?),
+                        Some(n) if self.config.space_before_colon => n + 1,
+                        Some(n) => n,
+                    };
+                    for item in list.iter_mut() {
+                        while item.1.ends_with('\n') {
+                            item.1.pop();
                         }
                     }
-                    let (head, body, foot) = if multiline {
-                        let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
-                        let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
-                        (
-                            format!("\n{}", indent_inner_str),
-                            items.join(&(String::from('\n') + &indent_inner_str)),
-                            format!("\n{}", indent_outer_str),
-                        )
+                    let merge_key_value = if self.config.align_colon {
+                        |a: String, b: String, key_max_length| format!("{:w$}: {}", a, b, w = key_max_length)
                     } else {
+                        |a: String, b: String, _| format!("{}: {}", a, b)
+                    };
+                    let mut items = list
+                        .into_iter()
+                        .map(|(a, b)| {
+                            if a.is_empty() {
+                                b
+                            } else {
+                                merge_key_value(a, b, key_max_length)
+                            }
+                        })
+                        .collect::<Vec<_>>();
+                    if !multiline || !self.config.wrap_close_brace {
                         if let Some(last) = items.last_mut() {
                             if last.ends_with(',') {
                                 last.pop();
                             }
                         }
-                        let extra = if self.config.space_inner_bracket { " " } else { "" };
-                        (extra.into(), items.join(" "), extra.into())
+                    }
+                    let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
+                    let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
+                    let inner_bracket_str = if self.config.space_inner_bracket { " " } else { "" };
+                    let (head, body, foot) = if multiline && self.config.wrap_close_brace {
+                        (
+                            format!("\n{}", indent_inner_str),
+                            items.join(&(String::from('\n') + &indent_inner_str)),
+                            format!("\n{}", indent_outer_str),
+                        )
+                    } else if multiline {
+                        (
+                            format!("\n{}", indent_inner_str),
+                            items.join(&(String::from('\n') + &indent_inner_str)),
+                            inner_bracket_str.into(),
+                        )
+                    } else {
+                        (inner_bracket_str.into(), items.join(" "), inner_bracket_str.into())
                     };
                     return Ok(write!(stage, "{}{}{}{}{}", char_begin, head, body, foot, char_close)?);
                 }
                 '#' => {
-                    buff.merge_span_to_line();
-                    if !buff.line.is_empty() {
-                        buff.line.push(',');
-                        items.push(buff.line);
-                        buff.line = String::new();
+                    buff.move_line_to_stage(&mut item.1);
+                    if !item.0.is_empty() || !item.1.is_empty() {
+                        item.1.push(',');
+                        list.push(item);
+                        item = (String::new(), String::new());
                     } else if newline_comment {
-                        items.push(buff.line);
-                        buff.line = String::new();
+                        list.push(item);
+                        item = (String::new(), String::new());
                     }
-                    if let Some(buff) = items.last_mut() {
-                        if !buff.is_empty() {
-                            buff.push(' ');
+                    if let Some(buff) = list.last_mut() {
+                        if !buff.1.is_empty() {
+                            buff.1.push(' ');
                         }
-                        self.parse_comment(buff)?;
+                        self.parse_comment(&mut buff.1)?;
                     }
                     newline_comment = true;
                 }
                 ':' => {
-                    buff.merge_span_to_line();
-                    if self.config.space_before_colon {
-                        buff.line.push_str(" :");
-                    } else {
-                        buff.line.push(':');
-                    }
+                    buff.move_line_to_stage(&mut item.0);
                     buff.last_identifier = false;
                 }
                 ',' => {
-                    buff.merge_span_to_line();
-                    buff.move_line_to_lists(&mut items);
+                    buff.move_line_to_stage(&mut item.1);
+                    if !item.0.is_empty() || !item.1.is_empty() {
+                        item.1.push(',');
+                        list.push(item);
+                        item = (String::new(), String::new());
+                    }
                     newline_comment = false;
                     buff.last_identifier = false;
                 }
@@ -476,17 +501,9 @@ impl Buffer {
         std::mem::swap(&mut self.line, &mut self.span);
         self.line.clear();
     }
-    fn move_line_to_lists(&mut self, lists: &mut Vec<String>) {
-        if !self.line.is_empty() {
-            self.line.push(',');
-            let mut line = String::new();
-            std::mem::swap(&mut line, &mut self.line);
-            lists.push(line);
-        }
-    }
     fn move_line_to_stage(&mut self, stage: &mut String) {
         self.merge_span_to_line();
-        stage.push_str(&self.line.trim_end_matches(' '));
+        stage.push_str(&self.line);
         self.line.clear();
     }
     fn move_line_to_stage_with_indent<F>(&mut self, stage: &mut String, first_line: &mut bool, push_indent_from_line: F)
@@ -499,7 +516,7 @@ impl Buffer {
         } else {
             push_indent_from_line(stage, &self.line);
         }
-        stage.push_str(&self.line.trim_end_matches(' '));
+        stage.push_str(&self.line);
         self.line.clear();
     }
 }
