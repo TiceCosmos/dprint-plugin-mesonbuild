@@ -3,3 +3,15 @@
 meson.build code formatting plugin for dprint.
 
 [Grammar](https://mesonbuild.com/Syntax.html#grammar)
+
+## Install
+
+See [Release](https://github.com/TiceCosmos/dprint-plugin-mesonbuild/releases/latest)
+
+## Configuration
+
+| Name              | Type | Default | description                                         |
+| :---------------- | :--- | ------: | :-------------------------------------------------- |
+| indentWidth       | u8   |       2 | indent width                                        |
+| spaceBeforeColon  | bool |   false | spaces before ":"                                   |
+| spaceInnerBracket | bool |   false | spaces before "(", "[", "{" and after "}", "]", ")" |

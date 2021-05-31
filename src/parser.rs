@@ -75,9 +75,7 @@ impl<'a, 'b> Parser<'a, 'b> {
                         self.parse_for_statement(&mut buff.span, 0)?;
                         buff.move_line_to_stage(stage);
                     }
-                    "elif" | "else" | "endif" | "endforeach" => {
-                        return Err(ParseError::InvalidSyntaxClose(buff.span))
-                    }
+                    "elif" | "else" | "endif" | "endforeach" => return Err(ParseError::InvalidSyntaxClose(buff.span)),
                     _ => buff.merge_span_to_line(),
                 },
                 Some(c) => self.match_char_parse(&mut buff, c, 0)?,
@@ -115,8 +113,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             }
             ')' | ']' | '}' => return Err(ParseError::InvalidSyntaxClose(c.into())),
             '+' | '-' => {
-                buff.last_identifier =
-                    (buff.span.is_empty() || !buff.last_identifier) && buff.begin_statement;
+                buff.last_identifier = (buff.span.is_empty() || !buff.last_identifier) && buff.begin_statement;
                 buff.begin_statement = false;
                 buff.merge_span_to_line();
                 buff.span.push(c);
@@ -170,23 +167,19 @@ impl<'a, 'b> Parser<'a, 'b> {
 
     fn parse_string(&mut self, stage: &mut String) -> Result {
         // single line strings
-        let parse_alone_string =
-            |chars: &mut Peekable<&mut Chars>, stage: &mut String, mut last: char| loop {
-                write!(stage, "'{}", last)?;
-                loop {
-                    match chars
-                        .next()
-                        .ok_or_else(|| ParseError::NotFindSyntaxClose("'".into()))?
-                    {
-                        '\'' if last != '\\' => {
-                            stage.push('\'');
-                            return Ok(());
-                        }
-                        c => last = c,
+        let parse_alone_string = |chars: &mut Peekable<&mut Chars>, stage: &mut String, mut last: char| loop {
+            write!(stage, "'{}", last)?;
+            loop {
+                match chars.next().ok_or_else(|| ParseError::NotFindSyntaxClose("'".into()))? {
+                    '\'' if last != '\\' => {
+                        stage.push('\'');
+                        return Ok(());
                     }
-                    stage.push(last);
+                    c => last = c,
                 }
-            };
+                stage.push(last);
+            }
+        };
 
         // multi line strings
         let parse_multi_string = |chars: &mut Peekable<&mut Chars>, stage: &mut String| {
@@ -242,13 +235,7 @@ impl<'a, 'b> Parser<'a, 'b> {
         self.parse_list(stage, indent, '(', ')')
     }
 
-    fn parse_list(
-        &mut self,
-        stage: &mut String,
-        indent_outer: u8,
-        char_begin: char,
-        char_close: char,
-    ) -> Result {
+    fn parse_list(&mut self, stage: &mut String, indent_outer: u8, char_begin: char, char_close: char) -> Result {
         let mut items = vec![];
 
         let mut buff = Buffer::new();
@@ -279,12 +266,8 @@ impl<'a, 'b> Parser<'a, 'b> {
                         }
                     }
                     let (head, body, foot) = if multiline {
-                        let indent_outer_str = std::iter::repeat(' ')
-                            .take(indent_outer.into())
-                            .collect::<String>();
-                        let indent_inner_str = std::iter::repeat(' ')
-                            .take(indent_inner.into())
-                            .collect::<String>();
+                        let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
+                        let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
                         (
                             format!("\n{}", indent_inner_str),
                             items.join(&(String::from('\n') + &indent_inner_str)),
@@ -296,18 +279,10 @@ impl<'a, 'b> Parser<'a, 'b> {
                                 last.pop();
                             }
                         }
-                        let extra = if self.config.space_inner_bracket {
-                            " "
-                        } else {
-                            ""
-                        };
+                        let extra = if self.config.space_inner_bracket { " " } else { "" };
                         (extra.into(), items.join(" "), extra.into())
                     };
-                    return Ok(write!(
-                        stage,
-                        "{}{}{}{}{}",
-                        char_begin, head, body, foot, char_close
-                    )?);
+                    return Ok(write!(stage, "{}{}{}{}{}", char_begin, head, body, foot, char_close)?);
                 }
                 '#' => {
                     buff.merge_span_to_line();
@@ -359,12 +334,8 @@ impl<'a, 'b> Parser<'a, 'b> {
     fn parse_if_statement(&mut self, stage: &mut String, indent_outer: u8) -> Result {
         let indent_inner = indent_outer + self.config.indent_width;
 
-        let indent_outer_str = std::iter::repeat(' ')
-            .take(indent_outer.into())
-            .collect::<String>();
-        let indent_inner_str = std::iter::repeat(' ')
-            .take(indent_inner.into())
-            .collect::<String>();
+        let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
+        let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
 
         let mut buff = Buffer::new();
 
@@ -383,18 +354,12 @@ impl<'a, 'b> Parser<'a, 'b> {
 
         loop {
             match self.chars.next() {
-                None if buff.span.as_str() == "endif" => {
-                    return Ok(write!(stage, "{}endif", indent_outer_str)?)
-                }
+                None if buff.span.as_str() == "endif" => return Ok(write!(stage, "{}endif", indent_outer_str)?),
                 None => return Err(ParseError::NotFindSyntaxClose("if".into())),
                 Some('#') => {
                     buff.merge_span_to_line();
                     self.parse_comment(&mut buff.span)?;
-                    buff.move_line_to_stage_with_indent(
-                        stage,
-                        &mut first_line,
-                        push_indent_from_line,
-                    );
+                    buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                 }
                 Some('\n') => {
                     match buff.span.as_ref() {
@@ -404,29 +369,17 @@ impl<'a, 'b> Parser<'a, 'b> {
                         "endif" => return Ok(writeln!(stage, "{}endif", indent_outer_str)?),
                         _ => {}
                     }
-                    buff.move_line_to_stage_with_indent(
-                        stage,
-                        &mut first_line,
-                        push_indent_from_line,
-                    );
+                    buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                     stage.push('\n');
                 }
                 Some(' ') => match buff.span.as_ref() {
                     "foreach" => {
                         self.parse_for_statement(&mut buff.span, indent_inner)?;
-                        buff.move_line_to_stage_with_indent(
-                            stage,
-                            &mut first_line,
-                            push_indent_from_line,
-                        );
+                        buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                     }
                     "if" => {
                         self.parse_if_statement(&mut buff.span, indent_inner)?;
-                        buff.move_line_to_stage_with_indent(
-                            stage,
-                            &mut first_line,
-                            push_indent_from_line,
-                        );
+                        buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                     }
                     "endforeach" => return Err(ParseError::InvalidSyntaxClose(buff.span)),
                     "endif" => return Ok(write!(stage, "{}endif", indent_outer_str)?),
@@ -439,12 +392,8 @@ impl<'a, 'b> Parser<'a, 'b> {
     fn parse_for_statement(&mut self, stage: &mut String, indent_outer: u8) -> Result {
         let indent_inner = indent_outer + self.config.indent_width;
 
-        let indent_outer_str = std::iter::repeat(' ')
-            .take(indent_outer.into())
-            .collect::<String>();
-        let indent_inner_str = std::iter::repeat(' ')
-            .take(indent_inner.into())
-            .collect::<String>();
+        let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
+        let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
 
         let mut buff = Buffer::new();
 
@@ -463,45 +412,27 @@ impl<'a, 'b> Parser<'a, 'b> {
                 Some('#') => {
                     buff.merge_span_to_line();
                     self.parse_comment(&mut buff.span)?;
-                    buff.move_line_to_stage_with_indent(
-                        stage,
-                        &mut first_line,
-                        push_indent_from_line,
-                    );
+                    buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                 }
                 Some('\n') => {
                     match buff.span.as_ref() {
                         "foreach" => self.parse_for_statement(&mut buff.span, indent_inner)?,
                         "if" => self.parse_if_statement(&mut buff.span, indent_inner)?,
-                        "endforeach" => {
-                            return Ok(writeln!(stage, "{}endforeach", indent_outer_str)?)
-                        }
+                        "endforeach" => return Ok(writeln!(stage, "{}endforeach", indent_outer_str)?),
                         "endif" => return Err(ParseError::InvalidSyntaxClose(buff.span)),
                         _ => {}
                     }
-                    buff.move_line_to_stage_with_indent(
-                        stage,
-                        &mut first_line,
-                        push_indent_from_line,
-                    );
+                    buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                     stage.push('\n');
                 }
                 Some(' ') => match buff.span.as_ref() {
                     "foreach" => {
                         self.parse_for_statement(&mut buff.span, indent_inner)?;
-                        buff.move_line_to_stage_with_indent(
-                            stage,
-                            &mut first_line,
-                            push_indent_from_line,
-                        );
+                        buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                     }
                     "if" => {
                         self.parse_if_statement(&mut buff.span, indent_inner)?;
-                        buff.move_line_to_stage_with_indent(
-                            stage,
-                            &mut first_line,
-                            push_indent_from_line,
-                        );
+                        buff.move_line_to_stage_with_indent(stage, &mut first_line, push_indent_from_line);
                     }
                     "endforeach" => return Ok(writeln!(stage, "{}endforeach", indent_outer_str)?),
                     "endif" => return Err(ParseError::InvalidSyntaxClose(buff.span)),
@@ -558,12 +489,8 @@ impl Buffer {
         stage.push_str(&self.line.trim_end_matches(' '));
         self.line.clear();
     }
-    fn move_line_to_stage_with_indent<F>(
-        &mut self,
-        stage: &mut String,
-        first_line: &mut bool,
-        push_indent_from_line: F,
-    ) where
+    fn move_line_to_stage_with_indent<F>(&mut self, stage: &mut String, first_line: &mut bool, push_indent_from_line: F)
+    where
         F: Fn(&mut String, &str),
     {
         self.merge_span_to_line();

@@ -19,15 +19,13 @@ impl PluginHandler<Configuration> for MesonPluginHandler {
                 .into_iter()
                 .map(|s| s.to_string())
                 .collect(),
-            help_url: "".to_string(),
+            help_url: "https://github.com/TiceCosmos/dprint-plugin-mesonbuild".to_string(),
             config_schema_url: "".to_string(),
         }
     }
 
     fn get_license_text(&mut self) -> String {
-        std::str::from_utf8(include_bytes!("../LICENSE"))
-            .unwrap()
-            .into()
+        include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/LICENSE")).into()
     }
 
     fn resolve_config(
