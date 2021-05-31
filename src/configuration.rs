@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Configuration {
     /// indent width
     pub indent_width: u8,
@@ -34,10 +35,9 @@ pub fn resolve_config(
     if let Some(value) = global_config.indent_width {
         config.indent_width = value;
     }
-
-    builder.get_nullable_value(&mut config.indent_width, "indent_width");
-    builder.get_nullable_value(&mut config.space_before_colon, "space_before_colon");
-    builder.get_nullable_value(&mut config.space_inner_bracket, "space_before_colon");
+    builder.get_nullable_value(&mut config.indent_width, "indentWidth");
+    builder.get_nullable_value(&mut config.space_before_colon, "spaceBeforeColon");
+    builder.get_nullable_value(&mut config.space_inner_bracket, "spaceInnerBracket");
 
     ResolveConfigurationResult {
         config,
