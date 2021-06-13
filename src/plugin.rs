@@ -15,7 +15,8 @@ impl PluginHandler<Configuration> for MesonPluginHandler {
             name: env!("CARGO_PKG_NAME").to_string(),
             version: env!("CARGO_PKG_VERSION").to_string(),
             config_key: "mesonbuild".to_string(),
-            file_extensions: vec!["meson.build", "meson_options.txt"]
+            file_extensions: vec![],
+            file_names: vec!["meson.build", "meson_options.txt"]
                 .into_iter()
                 .map(|s| s.to_string())
                 .collect(),
