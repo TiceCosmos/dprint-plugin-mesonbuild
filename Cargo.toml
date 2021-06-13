@@ -6,8 +6,8 @@ edition = "2018"
 license = "MIT"
 description = "Meson build code formatter."
 keywords = ["formatter", "meson"]
-homepage = "https://github.com/dprint/dprint-plugin-typescript"
-repository = "https://github.com/dprint/dprint-plugin-typescript"
+homepage = "https://github.com/TiceCosmos/dprint-plugin-mesonbuild"
+repository = "https://github.com/TiceCosmos/dprint-plugin-mesonbuild"
 
 
 [lib]
@@ -27,7 +27,7 @@ wasm = ["dprint-core/wasm"]
 
 
 [dependencies]
-dprint-core = { version = "0.43", features = ["formatting"] }
+dprint-core = "0.43"
 serde_json = "1.0"
 
 serde = { version = "*", features = ["derive"] }
