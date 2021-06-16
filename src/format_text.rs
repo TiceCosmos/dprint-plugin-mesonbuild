@@ -36,6 +36,7 @@ mod tests {
             ("-102", "-102"),
             ("var1=-102", "var1 = -102"),
             ("var1='hello'", "var1 = 'hello'"),
+            ("var1=0xff", "var1 = 0xff"),
             ("x=1+2\ny  +=3  *  4", "x = 1 + 2\ny += 3 * 4"),
             ("stat=item not in [1,2,3]", "stat = item not in [1, 2, 3]"),
             (
@@ -71,6 +72,8 @@ joined = '/usr/share' / 'projectname' # => /usr/share/projectname
 joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
 ",
             ),
+            ("s=f'int: @n@, string: @m@'", "s = f'int: @n@, string: @m@'"),
+            ("' '.join(list)", "' '.join(list)"),
         ]
         .into_iter()
         .for_each(|(src, dst)| {

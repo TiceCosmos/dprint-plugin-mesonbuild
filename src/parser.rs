@@ -86,7 +86,9 @@ impl<'a, 'b> Parser<'a, 'b> {
     fn match_char_parse(&mut self, buff: &mut Buffer, c: char, indent: u8) -> Result {
         match c {
             '\'' => {
-                buff.merge_span_to_line();
+                if buff.span != "f" {
+                    buff.merge_span_to_line();
+                }
                 self.parse_string(&mut buff.span)?;
                 buff.merge_span_to_line();
                 buff.last_identifier = true;
@@ -122,6 +124,13 @@ impl<'a, 'b> Parser<'a, 'b> {
                 buff.last_identifier = false;
                 buff.begin_statement = false;
                 buff.merge_span_to_line();
+                buff.span.push(c);
+            }
+            '.' => {
+                buff.begin_statement = false;
+                if buff.span.is_empty() {
+                    buff.move_line_to_span();
+                }
                 buff.span.push(c);
             }
             c if buff.last_identifier != crate::grammar::is_identifier(c) => {
@@ -551,5 +560,110 @@ impl Buffer {
         }
         stage.push_str(&self.line);
         self.line.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::configuration::DEFAULT_CONFIGURATION;
+    use std::ops::Deref;
+
+    #[test]
+    fn merge_buffer() {
+        const SOME_TEXT: &str = "some text";
+
+        let mut buffer = Buffer::new();
+        buffer.span = SOME_TEXT.into();
+
+        buffer.merge_span_to_line();
+        assert!(buffer.span.is_empty());
+        assert_eq!(buffer.line, SOME_TEXT);
+
+        buffer.move_line_to_span();
+        assert_eq!(buffer.span, SOME_TEXT);
+        assert!(buffer.line.is_empty());
+
+        let mut stage = String::new();
+        buffer.move_line_to_stage(&mut stage);
+        assert!(buffer.span.is_empty());
+        assert!(buffer.line.is_empty());
+        assert_eq!(stage, SOME_TEXT);
+    }
+
+    #[test]
+    fn parse_comment() {
+        let mut chars = "text".chars();
+
+        let mut stage = String::new();
+
+        Parser::new(&DEFAULT_CONFIGURATION, &mut chars)
+            .parse_comment(&mut stage)
+            .unwrap();
+
+        assert_eq!(stage, "# text");
+    }
+
+    #[test]
+    fn parse_string() {
+        let mut stage = String::new();
+
+        for (chars, expected) in &[("text'", "'text'"), ("''text'''", "'''text'''")] {
+            let mut chars = chars.chars();
+            stage.clear();
+            Parser::new(&DEFAULT_CONFIGURATION, &mut chars)
+                .parse_string(&mut stage)
+                .unwrap();
+            assert_eq!(stage, expected.deref());
+        }
+    }
+
+    #[test]
+    fn parse_array() {
+        let mut stage = String::new();
+
+        for (chars, expected) in &[("1,2,3]", "[1, 2, 3]"), ("1,\n2,3]", "[\n  1,\n  2,\n  3,\n]")] {
+            let mut chars = chars.chars();
+            stage.clear();
+            Parser::new(&DEFAULT_CONFIGURATION, &mut chars)
+                .parse_array(&mut stage, 0)
+                .unwrap();
+            assert_eq!(stage, expected.deref());
+        }
+    }
+
+    #[test]
+    fn parse_dictionary() {
+        let mut stage = String::new();
+
+        for (chars, expected) in &[
+            ("'a':1,'b':2}", "{'a': 1, 'b': 2}"),
+            ("'a':1,\n'b':2}", "{\n  'a': 1,\n  'b': 2,\n}"),
+        ] {
+            let mut chars = chars.chars();
+            stage.clear();
+            Parser::new(&DEFAULT_CONFIGURATION, &mut chars)
+                .parse_dictionary(&mut stage, 0)
+                .unwrap();
+            assert_eq!(stage, expected.deref());
+        }
+    }
+
+    #[test]
+    fn parse_argument() {
+        let mut stage;
+
+        for (chars, expected, prefix) in &[
+            ("'a','b':1)", "('a', 'b': 1)", ""),
+            ("'a',\n'b':1)", "(\n  'a',\n  'b': 1,\n)", ""),
+            ("'a',\n'b':1)", "project('a',\n  'b': 1,\n)", "project"),
+        ] {
+            stage = prefix.to_string();
+            let mut chars = chars.chars();
+            Parser::new(&DEFAULT_CONFIGURATION, &mut chars)
+                .parse_argument(&mut stage, 0)
+                .unwrap();
+            assert_eq!(stage, expected.deref());
+        }
     }
 }
