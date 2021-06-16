@@ -16,7 +16,11 @@ fn assert_with_config(expected: &str, toml_config: &str) {
         .format_text(&Path::new("meson.build"), ORIGIN_CONTENT, &config, format_with_host)
         .unwrap();
 
-    assert_eq!(result, expected);
+    for (a, b) in result.lines().zip(expected.lines()) {
+        assert_eq!(a, b);
+    }
+
+    assert_eq!(result.lines().count(), expected.lines().count());
 }
 
 #[test]

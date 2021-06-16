@@ -1,6 +1,6 @@
 [package]
 name = "dprint-plugin-mesonbuild"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Tice Cosmos <tice@139.com>"]
 edition = "2018"
 license = "MIT"

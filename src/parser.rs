@@ -224,18 +224,38 @@ impl<'a, 'b> Parser<'a, 'b> {
 
 impl<'a, 'b> Parser<'a, 'b> {
     fn parse_array(&mut self, stage: &mut String, indent: u8) -> Result {
-        self.parse_list(stage, indent, '[', ']')
+        self.parse_list(stage, indent, '[', ']', false)
     }
 
     fn parse_dictionary(&mut self, stage: &mut String, indent: u8) -> Result {
-        self.parse_list(stage, indent, '{', '}')
+        self.parse_list(stage, indent, '{', '}', false)
     }
 
     fn parse_argument(&mut self, stage: &mut String, indent: u8) -> Result {
-        self.parse_list(stage, indent, '(', ')')
+        let has_name = self.config.nowrap_before_name
+            && (stage.ends_with("project")
+                || stage.ends_with("dependency")
+                || stage.ends_with("target")
+                || stage.ends_with("library")
+                || stage.ends_with("module")
+                || stage.ends_with("executable")
+                || stage.ends_with("jar")
+                || stage.ends_with("benchmark")
+                || stage.ends_with("test")
+                || stage.ends_with("add_languages")
+                || stage.ends_with("add_test_setup")
+                || stage.ends_with("subdir"));
+        self.parse_list(stage, indent, '(', ')', has_name)
     }
 
-    fn parse_list(&mut self, stage: &mut String, indent_outer: u8, char_begin: char, char_close: char) -> Result {
+    fn parse_list(
+        &mut self,
+        stage: &mut String,
+        indent_outer: u8,
+        char_begin: char,
+        char_close: char,
+        has_name: bool,
+    ) -> Result {
         // BUG: cann't format the comment between key and value
         let mut list = vec![];
         let mut item = (String::new(), String::new());
@@ -268,6 +288,24 @@ impl<'a, 'b> Parser<'a, 'b> {
                             item.1.pop();
                         }
                     }
+
+                    let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
+                    let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
+                    let inner_bracket_str = if self.config.space_inner_bracket { " " } else { "" };
+
+                    let head = if multiline && has_name && list.first().map(|(x, _)| x.is_empty()) == Some(true) {
+                        inner_bracket_str.into()
+                    } else if multiline {
+                        format!("\n{}", indent_inner_str)
+                    } else {
+                        inner_bracket_str.into()
+                    };
+                    let foot = if multiline && self.config.wrap_close_brace {
+                        format!("\n{}", indent_outer_str)
+                    } else {
+                        inner_bracket_str.into()
+                    };
+
                     let merge_key_value = if self.config.align_colon {
                         |a: String, b: String, key_max_length| format!("{:w$}: {}", a, b, w = key_max_length)
                     } else {
@@ -290,24 +328,13 @@ impl<'a, 'b> Parser<'a, 'b> {
                             }
                         }
                     }
-                    let indent_outer_str = std::iter::repeat(' ').take(indent_outer.into()).collect::<String>();
-                    let indent_inner_str = std::iter::repeat(' ').take(indent_inner.into()).collect::<String>();
-                    let inner_bracket_str = if self.config.space_inner_bracket { " " } else { "" };
-                    let (head, body, foot) = if multiline && self.config.wrap_close_brace {
-                        (
-                            format!("\n{}", indent_inner_str),
-                            items.join(&(String::from('\n') + &indent_inner_str)),
-                            format!("\n{}", indent_outer_str),
-                        )
-                    } else if multiline {
-                        (
-                            format!("\n{}", indent_inner_str),
-                            items.join(&(String::from('\n') + &indent_inner_str)),
-                            inner_bracket_str.into(),
-                        )
+
+                    let body = if multiline {
+                        items.join(&(String::from('\n') + &indent_inner_str))
                     } else {
-                        (inner_bracket_str.into(), items.join(" "), inner_bracket_str.into())
+                        items.join(" ")
                     };
+
                     return Ok(write!(stage, "{}{}{}{}{}", char_begin, head, body, foot, char_close)?);
                 }
                 '#' => {

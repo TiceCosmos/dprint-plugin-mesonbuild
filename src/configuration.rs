@@ -18,6 +18,8 @@ pub struct Configuration {
     pub space_inner_bracket: bool,
     /// wrap before `) ] }`
     pub wrap_close_brace: bool,
+    /// nowrap before name argument
+    pub nowrap_before_name: bool,
 }
 pub const DEFAULT_CONFIGURATION: Configuration = Configuration {
     indent_width: 2,
@@ -25,6 +27,7 @@ pub const DEFAULT_CONFIGURATION: Configuration = Configuration {
     space_before_colon: false,
     space_inner_bracket: false,
     wrap_close_brace: true,
+    nowrap_before_name: true,
 };
 impl Default for Configuration {
     fn default() -> Self {
@@ -47,6 +50,7 @@ pub fn resolve_config(
     builder.get_nullable_value(&mut config.space_before_colon, "spaceBeforeColon");
     builder.get_nullable_value(&mut config.space_inner_bracket, "spaceInnerBracket");
     builder.get_nullable_value(&mut config.wrap_close_brace, "wrapCloseBrace");
+    builder.get_nullable_value(&mut config.nowrap_before_name, "nowrapBeforeName");
 
     ResolveConfigurationResult {
         config,
@@ -107,6 +111,7 @@ mod tests {
             space_before_colon: !DEFAULT_CONFIGURATION.space_before_colon,
             space_inner_bracket: !DEFAULT_CONFIGURATION.space_inner_bracket,
             wrap_close_brace: !DEFAULT_CONFIGURATION.wrap_close_brace,
+            nowrap_before_name: !DEFAULT_CONFIGURATION.wrap_close_brace,
         };
 
         let key_map = vec![
@@ -124,6 +129,10 @@ mod tests {
                 ConfigKeyValue::Bool(changed_config.space_inner_bracket),
             ),
             ("wrapCloseBrace", ConfigKeyValue::Bool(changed_config.wrap_close_brace)),
+            (
+                "nowrapBeforeName",
+                ConfigKeyValue::Bool(changed_config.nowrap_before_name),
+            ),
         ]
         .into_iter()
         .map(|(k, v)| (k.to_string(), v))

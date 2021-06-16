@@ -3,3 +3,4 @@ alignColon = true
 spaceBeforeColon = true
 spaceInnerBracket = true
 wrapCloseBrace = true
+nowrapBeforeName = false

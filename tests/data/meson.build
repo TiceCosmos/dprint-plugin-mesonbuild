@@ -1,8 +1,7 @@
 # project
 project('dprint-plugin-mesonbuild', 'rust')
 project('dprint-plugin-mesonbuild', 'rust', 'c', version: '0.1.0')
-project(
-  'dprint-plugin-mesonbuild',
+project('dprint-plugin-mesonbuild',
   ['c', 'cpp'],
   version: '0.1.0',
   meson_version: '>=0.56.0',
@@ -41,14 +40,12 @@ spdlog_dep = subproject('spdlog', default_options: [
 # dependency
 thread_dep = dependency('threads')
 llvm_dep = dependency('llvm', version: '>= 4.0', modules: ['amdgpu'])
-llvm_dep = dependency(
-  'llvm',
+llvm_dep = dependency('llvm',
   version: '>= 4.0',
   modules: ['amdgpu'],
   optional_modules: ['inteljitevents'],
 )
-zlib_dep = dependency(
-  'zlib',
+zlib_dep = dependency('zlib',
   include_type: 'system',
   required: false,
   disabler: true,
@@ -65,10 +62,8 @@ subdir('core')
 # combination
 if get_option('build_tests')
   foreach name, info : test_info_list
-    test(
-      'test_' + name,
-      executable(
-        'test_' + name,
+    test('test_' + name,
+      executable('test_' + name,
         info.get('src'),
         include_directories: info.get('inc'),
         link_with: info.get('lnk'),
@@ -79,3 +74,16 @@ if get_option('build_tests')
     )
   endforeach
 endif
+
+
+install_headers(
+  'common.h',
+  'proj/kola.h',
+  subdir: 'myproj',
+)
+
+mydep = declare_dependency(
+  include_directories: include_directories('.'),
+  link_with: mylibrary,
+  sources: myheader,
+)

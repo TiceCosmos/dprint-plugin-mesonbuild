@@ -139,7 +139,7 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
             ("executable('progname','prog.c')", "executable('progname', 'prog.c')"),
             (
                 "executable('progname',\nsources: 'prog.c',\nc_args: '-DFOO=1')",
-                "executable(\n  'progname',\n  sources: 'prog.c',\n  c_args: '-DFOO=1',\n)",
+                "executable('progname',\n  sources: 'prog.c',\n  c_args: '-DFOO=1',\n)",
             ),
             (
                 "  executable('progname',kwargs: d)",
@@ -151,7 +151,7 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
             ),
             (
                 "executable('name',\n['main.c','lib.c'])",
-                "executable(\n  'name',\n  ['main.c', 'lib.c'],\n)",
+                "executable('name',\n  ['main.c', 'lib.c'],\n)",
             ),
             (
                 "executable('name',['main.c',\n'lib.c'])",
