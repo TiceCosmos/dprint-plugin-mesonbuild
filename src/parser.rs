@@ -463,6 +463,12 @@ impl<'a, 'b> Parser<'a, 'b> {
                     "endif" => return Err(ParseError::InvalidSyntaxClose(buff.span)),
                     _ => buff.merge_span_to_line(),
                 },
+                Some(',') => {
+                    buff.last_identifier = false;
+                    buff.begin_statement = true;
+                    buff.span.push(',');
+                    buff.merge_span_to_line();
+                }
                 Some(c) => self.match_char_parse(&mut buff, c, indent_inner)?,
             }
         }

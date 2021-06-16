@@ -2,59 +2,34 @@ use dprint_core::{configuration::ConfigKeyMap, plugins::PluginHandler, types::Er
 use dprint_plugin_mesonbuild::*;
 use std::path::Path;
 
-const ORIGIN_FILE_PATH: &str = "data/meson.build";
 const ORIGIN_CONTENT: &str = include_str!("data/meson.build");
+const CONFIG_CONTENT: &str = include_str!("data/config.toml");
 
 fn format_with_host(_: &Path, _: String, _: &ConfigKeyMap) -> Result<String, ErrBox> {
     Ok("".to_string())
 }
 
-#[test]
-fn format0() {
-    const FORMAT_CONTENT: &str = include_str!("data/0/meson.build");
-    let config: Configuration = toml::from_str(include_str!("data/0/config.toml")).unwrap();
+fn assert_with_config(expected: &str, toml_config: &str) {
+    let config = toml::from_str(toml_config).unwrap();
 
-    let result = MesonPluginHandler::default().format_text(
-        &Path::new(ORIGIN_FILE_PATH),
-        ORIGIN_CONTENT,
-        &config,
-        format_with_host,
-    );
-    let result = result.unwrap();
+    let result = MesonPluginHandler::default()
+        .format_text(&Path::new("meson.build"), ORIGIN_CONTENT, &config, format_with_host)
+        .unwrap();
 
-    assert_eq!(result, FORMAT_CONTENT);
+    assert_eq!(result, expected);
 }
 
 #[test]
-fn format1() {
-    const FORMAT_CONTENT: &str = include_str!("data/1/meson.build");
-    let config: Configuration = toml::from_str(include_str!("data/1/config.toml")).unwrap();
-
-    let result = MesonPluginHandler::default().format_text(
-        &Path::new(ORIGIN_FILE_PATH),
-        ORIGIN_CONTENT,
-        &config,
-        format_with_host,
-    );
-    let result = result.unwrap();
-
-    assert_eq!(result, FORMAT_CONTENT);
+fn format_file_0() {
+    assert_with_config(ORIGIN_CONTENT, CONFIG_CONTENT);
 }
 
 #[test]
-fn format2() {
-    const FORMAT_CONTENT: &str = include_str!("data/2/meson.build");
-    let config: Configuration = toml::from_str(include_str!("data/2/config.toml")).unwrap();
+fn format_file_1() {
+    assert_with_config(include_str!("data/1/meson.build"), include_str!("data/1/config.toml"));
+}
 
-    let result = MesonPluginHandler::default().format_text(
-        &Path::new(ORIGIN_FILE_PATH),
-        ORIGIN_CONTENT,
-        &config,
-        format_with_host,
-    );
-    let result = result.unwrap();
-
-    std::fs::write("/tmp/meson.build", &result).unwrap();
-
-    assert_eq!(result, FORMAT_CONTENT);
+#[test]
+fn format_file_2() {
+    assert_with_config(include_str!("data/2/meson.build"), include_str!("data/2/config.toml"));
 }

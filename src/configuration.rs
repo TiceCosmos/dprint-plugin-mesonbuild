@@ -14,9 +14,9 @@ pub struct Configuration {
     pub align_colon: bool,
     /// spaces before `:`
     pub space_before_colon: bool,
-    /// spaces before `(, [, {` and after `), ], }`
+    /// spaces before `( [ {` and after `) ] }`
     pub space_inner_bracket: bool,
-    /// wrap before `), ], }`
+    /// wrap before `) ] }`
     pub wrap_close_brace: bool,
 }
 pub const DEFAULT_CONFIGURATION: Configuration = Configuration {

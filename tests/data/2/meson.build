@@ -59,7 +59,7 @@ subdir('core')
 
 # combination
 if get_option('build_tests')
-  foreach name , info : test_info_list
+  foreach name, info : test_info_list
     test(
       'test_' + name,
       executable(
