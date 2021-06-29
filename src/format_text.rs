@@ -122,7 +122,10 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         vec![
             ("{}", "{}"),
             ("{{}\n,[]}", "{\n  {},\n  [],\n}"),
-            ("my_dict={'foo':42,'bar':'baz'}", "my_dict = {'foo': 42, 'bar': 'baz'}"),
+            (
+                "my_dict={'foo':42,'bar':'baz'}",
+                "my_dict = {'foo': 42, 'bar': 'baz'}",
+            ),
             (
                 "d={'a'+  'b' :  42}\nk='cd'\nd+={k:43  }  ",
                 "d = {'a' + 'b': 42}\nk = 'cd'\nd += {k: 43}",
@@ -139,7 +142,10 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
     fn format_argument() {
         vec![
             ("()", "()"),
-            ("executable('progname','prog.c')", "executable('progname', 'prog.c')"),
+            (
+                "executable('progname','prog.c')",
+                "executable('progname', 'prog.c')",
+            ),
             (
                 "executable('progname',\nsources: 'prog.c',\nc_args: '-DFOO=1')",
                 "executable('progname',\n  sources: 'prog.c',\n  c_args: '-DFOO=1',\n)",
@@ -175,7 +181,10 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
     #[test]
     fn format_statement_if() {
         vec![
-            ("if a==b\n#do something \nendif", "if a == b\n  # do something\nendif"),
+            (
+                "if a==b\n#do something \nendif",
+                "if a == b\n  # do something\nendif",
+            ),
             (
                 "if item  not in  list\n#do something\nendif",
                 "if item not in list\n  # do something\nendif",

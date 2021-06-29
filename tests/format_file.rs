@@ -13,7 +13,12 @@ fn assert_with_config(expected: &str, toml_config: &str) {
     let config = toml::from_str(toml_config).unwrap();
 
     let result = MesonPluginHandler::default()
-        .format_text(&Path::new("meson.build"), ORIGIN_CONTENT, &config, format_with_host)
+        .format_text(
+            &Path::new("meson.build"),
+            ORIGIN_CONTENT,
+            &config,
+            format_with_host,
+        )
         .unwrap();
 
     for (a, b) in result.lines().zip(expected.lines()) {
@@ -30,10 +35,16 @@ fn format_file_0() {
 
 #[test]
 fn format_file_1() {
-    assert_with_config(include_str!("data/1/meson.build"), include_str!("data/1/config.toml"));
+    assert_with_config(
+        include_str!("data/1/meson.build"),
+        include_str!("data/1/config.toml"),
+    );
 }
 
 #[test]
 fn format_file_2() {
-    assert_with_config(include_str!("data/2/meson.build"), include_str!("data/2/config.toml"));
+    assert_with_config(
+        include_str!("data/2/meson.build"),
+        include_str!("data/2/config.toml"),
+    );
 }

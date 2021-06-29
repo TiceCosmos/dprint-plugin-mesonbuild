@@ -71,7 +71,8 @@ impl ConfigurationBuilder {
     }
     fn extend(self) -> Vec<ConfigurationDiagnostic> {
         let mut data = self;
-        data.diagnostics.extend(get_unknown_property_diagnostics(data.config));
+        data.diagnostics
+            .extend(get_unknown_property_diagnostics(data.config));
         data.diagnostics
     }
     fn get_nullable_value<T>(&mut self, store: &mut T, key: &'static str)
@@ -79,9 +80,11 @@ impl ConfigurationBuilder {
         T: FromStr,
         <T as FromStr>::Err: fmt::Display,
     {
-        if let Some(value) =
-            dprint_core::configuration::get_nullable_value(&mut self.config, key, &mut self.diagnostics)
-        {
+        if let Some(value) = dprint_core::configuration::get_nullable_value(
+            &mut self.config,
+            key,
+            &mut self.diagnostics,
+        ) {
             *store = value;
         }
     }
@@ -119,7 +122,10 @@ mod tests {
                 "indentWidth",
                 ConfigKeyValue::Number(changed_config.indent_width as i32),
             ),
-            ("alignColon", ConfigKeyValue::Bool(changed_config.align_colon)),
+            (
+                "alignColon",
+                ConfigKeyValue::Bool(changed_config.align_colon),
+            ),
             (
                 "spaceBeforeColon",
                 ConfigKeyValue::Bool(changed_config.space_before_colon),
@@ -128,7 +134,10 @@ mod tests {
                 "spaceInnerBracket",
                 ConfigKeyValue::Bool(changed_config.space_inner_bracket),
             ),
-            ("wrapCloseBrace", ConfigKeyValue::Bool(changed_config.wrap_close_brace)),
+            (
+                "wrapCloseBrace",
+                ConfigKeyValue::Bool(changed_config.wrap_close_brace),
+            ),
             (
                 "nowrapBeforeName",
                 ConfigKeyValue::Bool(changed_config.nowrap_before_name),
@@ -138,6 +147,9 @@ mod tests {
         .map(|(k, v)| (k.to_string(), v))
         .collect::<ConfigKeyMap>();
 
-        assert_eq!(resolve_config(key_map, &global_config).config, changed_config);
+        assert_eq!(
+            resolve_config(key_map, &global_config).config,
+            changed_config
+        );
     }
 }
