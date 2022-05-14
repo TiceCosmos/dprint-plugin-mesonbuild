@@ -1,11 +1,11 @@
 use crate::configuration::Configuration;
 use crate::parser::ParseError;
 
-pub fn format_text(file_text: &str, config: &Configuration) -> Result<String, ParseError> {
+pub fn format_text(file_text: &str, config: &Configuration) -> Result<Option<String>, ParseError> {
     let mut chars = file_text.chars();
     let mut formated = String::new();
     crate::parser::parse(config, &mut chars, &mut formated)?;
-    Ok(formated)
+    Ok(Some(formated))
 }
 
 #[cfg(test)]
@@ -15,7 +15,10 @@ mod tests {
 
     #[test]
     fn format_auxiliary() {
-        assert_eq!(format_text("", &DEFAULT_CONFIGURATION).unwrap(), "");
+        assert_eq!(
+            format_text("", &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+            ""
+        );
 
         vec![
             ("#", "#"),
@@ -25,8 +28,14 @@ mod tests {
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -46,8 +55,14 @@ mod tests {
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -77,8 +92,14 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -112,8 +133,14 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -133,8 +160,14 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -173,8 +206,14 @@ joined = 'C:\\foo\\bar' / 'D:\\builddir' # => D:/builddir
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -250,8 +289,14 @@ endif
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 
@@ -299,8 +344,14 @@ endforeach
         ]
         .into_iter()
         .for_each(|(src, dst)| {
-            assert_eq!(format_text(src, &DEFAULT_CONFIGURATION).unwrap(), dst);
-            assert_eq!(format_text(dst, &DEFAULT_CONFIGURATION).unwrap(), dst);
+            assert_eq!(
+                format_text(src, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
+            assert_eq!(
+                format_text(dst, &DEFAULT_CONFIGURATION).unwrap().unwrap(),
+                dst
+            );
         });
     }
 }

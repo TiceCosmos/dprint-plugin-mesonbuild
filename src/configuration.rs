@@ -93,11 +93,16 @@ impl ConfigurationBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dprint_core::configuration::{resolve_global_config, ConfigKeyValue};
+    use dprint_core::configuration::{
+        resolve_global_config, ConfigKeyValue, ResolveGlobalConfigOptions,
+    };
+    use std::default::Default;
 
     #[test]
     fn resolve_null_config() {
-        let global_config = resolve_global_config(ConfigKeyMap::new()).config;
+        let global_config_default = ResolveGlobalConfigOptions::default();
+        let global_config =
+            resolve_global_config(ConfigKeyMap::new(), &global_config_default).config;
         assert_eq!(
             resolve_config(ConfigKeyMap::new(), &global_config).config,
             DEFAULT_CONFIGURATION
@@ -106,7 +111,9 @@ mod tests {
 
     #[test]
     fn resolve_full_config() {
-        let global_config = resolve_global_config(ConfigKeyMap::new()).config;
+        let global_config_default = ResolveGlobalConfigOptions::default();
+        let global_config =
+            resolve_global_config(ConfigKeyMap::new(), &global_config_default).config;
 
         let changed_config = Configuration {
             indent_width: DEFAULT_CONFIGURATION.indent_width * 2,
