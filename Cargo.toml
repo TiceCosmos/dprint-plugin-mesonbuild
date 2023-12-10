@@ -24,11 +24,11 @@ panic = "abort"
 wasm = ["dprint-core/wasm"]
 
 [dependencies]
-dprint-core = "0.57"
+dprint-core = { version = "0.64", features = ["formatting"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 
 anyhow = "*"
 serde = { version = "*", features = ["derive"] }
 
 [dev-dependencies]
-toml = "0.5"
+toml = "0.8"

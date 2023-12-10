@@ -2,7 +2,7 @@ mod configuration;
 mod format_text;
 mod grammar;
 mod parser;
-mod plugin;
+mod wasm_plugin;
 
 pub use configuration::Configuration;
-pub use plugin::*;
+pub use wasm_plugin::*;

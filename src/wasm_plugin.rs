@@ -1,7 +1,7 @@
 use crate::configuration::Configuration;
 use dprint_core::{
     configuration::{ConfigKeyMap, GlobalConfiguration, ResolveConfigurationResult},
-    plugins::{FormatResult, PluginInfo, SyncPluginHandler},
+    plugins::{FileMatchingInfo, FormatResult, PluginInfo, SyncPluginHandler, SyncPluginInfo},
 };
 use std::path::Path;
 
@@ -17,19 +17,20 @@ impl SyncPluginHandler<Configuration> for MesonPluginHandler {
         crate::configuration::resolve_config(config, global_config)
     }
 
-    fn plugin_info(&mut self) -> PluginInfo {
-        PluginInfo {
-            name: env!("CARGO_PKG_NAME").to_string(),
-            version: env!("CARGO_PKG_VERSION").to_string(),
-            config_key: "mesonbuild".to_string(),
-            file_extensions: vec![],
-            file_names: vec!["meson.build", "meson_options.txt"]
-                .into_iter()
-                .map(|s| s.to_string())
-                .collect(),
-            help_url: "https://github.com/TiceCosmos/dprint-plugin-mesonbuild".to_string(),
-            config_schema_url: "".to_string(),
-            update_url: None,
+    fn plugin_info(&mut self) -> SyncPluginInfo {
+        SyncPluginInfo {
+            info: PluginInfo {
+                name: env!("CARGO_PKG_NAME").to_string(),
+                version: env!("CARGO_PKG_VERSION").to_string(),
+                config_key: "mesonbuild".to_string(),
+                help_url: "https://github.com/TiceCosmos/dprint-plugin-mesonbuild".to_string(),
+                config_schema_url: "".to_string(),
+                update_url: None,
+            },
+            file_matching: FileMatchingInfo {
+                file_extensions: vec![],
+                file_names: vec!["meson.build".to_string(), "meson_options.txt".to_string()],
+            },
         }
     }
 
